@@ -15,7 +15,7 @@ import tensorflow as tf
 import math
 from tensorflow import keras
 from tensorflow.keras import layers
-
+  import librosa
 
 
 """
@@ -195,7 +195,7 @@ def mk_preds_fa(audio_path, hop_size = 6.0, discard = 1.0, win_length = 8.0, sam
       M = mss.T
       mss_batch[j, :, :] = M
 
-    preds[i * batch_size:(i + 1) * batch_size, :, :] = (model.predict(mss_batch) >= (0.5, 0.5)).astype(np.float)
+    preds[i * batch_size:(i + 1) * batch_size, :, :] = (model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
 
   if n_batch * batch_size < n_preds:
     i = n_batch
@@ -207,7 +207,7 @@ def mk_preds_fa(audio_path, hop_size = 6.0, discard = 1.0, win_length = 8.0, sam
       M = mss.T
       mss_batch[j, :, :] = M
 
-    preds[i * batch_size:n_preds, :, :] = (model.predict(mss_batch) >= (0.5, 0.5)).astype(np.float)
+    preds[i * batch_size:n_preds, :, :] = (model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
 
   preds_mid = np.copy(preds[1:-1, 100:702, :])
 
@@ -226,22 +226,9 @@ def mk_preds_fa(audio_path, hop_size = 6.0, discard = 1.0, win_length = 8.0, sam
 
   return oa_preds
 
-if __name__ == '__main__':
-
-  parser = argparse.ArgumentParser(description="Music and speech detection on a given audio and output as txt file")
-  parser.add_argument('input_path', help='Input wav file path')
-  parser.add_argument('output_path', help="Output txt file path")
-
-  args = parser.parse_args()
-
-  test_audio = args.input_path
-
-  m = 'model d-DS.h5'
-
-  mel_input = keras.Input(shape=(802, 80), name="mel_input")
-  X = mel_input
-
-  X = tf.keras.layers.Reshape((802, 80, 1))(X)
+def build_model():
+  
+  X = tf.keras.layers.Reshape((802, 80, 1)) #(X)
 
   X = tf.keras.layers.Conv2D(filters=16, kernel_size=7, strides=1, padding='same')(X)
   X = layers.BatchNormalization(momentum=0.0)(X)
@@ -266,6 +253,26 @@ if __name__ == '__main__':
 
   pred = layers.TimeDistributed(layers.Dense(2, activation='sigmoid'))(X)
 
+  return pred
+  
+
+if __name__ == '__main__':
+
+  parser = argparse.ArgumentParser(description="Music and speech detection on a given audio and output as txt file")
+  parser.add_argument('input_path', help='Input wav file path')
+  parser.add_argument('output_path', help="Output txt file path")
+
+  args = parser.parse_args()
+
+  test_audio = args.input_path
+
+  m = 'models/model d-DS.h5'
+
+  mel_input = keras.Input(shape=(802, 80), name="mel_input")
+  X = mel_input
+
+  pred = build_model()
+  
   model = keras.Model(inputs = [mel_input], outputs = [pred])
 
   model.compile(
@@ -276,7 +283,8 @@ if __name__ == '__main__':
 
   model.load_weights(m)
 
-  ss, _ = sf.read(test_audio)
+  #ss, _ = sf.read(test_audio)
+  ss, _ = librosa.load(test_audio, mono=True, sr=22050)
   oop = mk_preds_fa(test_audio)
 
   p_smooth = smooth_output(oop.T, min_speech=1.3, min_music=3.4, max_silence_speech=0.4, max_silence_music=0.6)
