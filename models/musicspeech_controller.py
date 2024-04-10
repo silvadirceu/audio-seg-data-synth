@@ -11,13 +11,13 @@ import argparse
 import numpy as np
 import librosa
 import math
-from musicspeech_class import MusicSpeechClass
+from models.musicspeech_class import MusicSpeechClass
 
 class MusicSpeechController():
   
   def __init__(self, params):
     
-    self.model = MusicSpeechClass()
+    self.model = MusicSpeechClass(params)
     self.params = params
   
   def frames_to_time(self, f, sr = 22050.0, hop_size = 220):

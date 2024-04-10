@@ -154,3 +154,4 @@ temp_dataframe.xlsx
 .DS_Store
 ~$*.xlsx
 **/audio
+*.ogg

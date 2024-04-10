@@ -16,6 +16,6 @@ class MusicSpeech_Params:
     audio_clip_length: float = 8.0
     
     # Model
-    model_weights_file: str = 'models/model d-DS.h5'
+    model_weights_file: str = 'model d-DS.h5'
     
     batch_size: int = 128

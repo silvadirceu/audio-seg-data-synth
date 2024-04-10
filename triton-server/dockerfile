@@ -1,0 +1,11 @@
+FROM nvcr.io/nvidia/tritonserver:23.12-py3
+
+VOLUME /models
+
+COPY . .
+
+EXPOSE 8000 8001 8002
+
+CMD ["tritonserver", "--model-repository=/models"]
+
+# docker run --rm -p 8100:8000 -p 8101:8001 -p 8002:8002 -v "$(pwd)"/model_repository:/models tritonserver
