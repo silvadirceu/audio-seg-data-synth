@@ -1,3 +1,0 @@
-name: "musicdetection"
-platform: "tensorflow_savedmodel"
-max_batch_size: 0

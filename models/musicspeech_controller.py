@@ -11,14 +11,17 @@ import argparse
 import numpy as np
 import librosa
 import math
-from models.musicspeech_class import MusicSpeechClass
+from hermes.abstract.client import Client
+from musicspeech_class import MusicSpeechClass
+
 
 class MusicSpeechController():
   
-  def __init__(self, params):
+  def __init__(self, client: Client, params):
     
     self.model = MusicSpeechClass(params)
     self.params = params
+    self.client = client
   
   def frames_to_time(self, f, sr = 22050.0, hop_size = 220):
     return f * hop_size / sr
@@ -172,7 +175,7 @@ class MusicSpeechController():
     n_batch = n_preds // self.params.batch_size
 
     for i in range(n_batch):
-      mss_batch = np.zeros((batch_size, 802, 80))
+      mss_batch = np.zeros((batch_size, 802, 80), dtype=np.float32)
       for j in range(batch_size):
         seg = in_signal_pad[(i * batch_size + j)* hop_size_samples:((i * batch_size + j) * hop_size_samples) + win_length_samples]
         seg = librosa.util.normalize(seg)
@@ -180,11 +183,13 @@ class MusicSpeechController():
         M = mss.T
         mss_batch[j, :, :] = M
 
-      preds[i * batch_size:(i + 1) * batch_size, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
+      #preds[i * batch_size:(i + 1) * batch_size, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
+      preds[i * batch_size:(i + 1) * batch_size, :, :] = (self.client.predict([mss_batch])[0] >= [0.5, 0.5]).astype(float)
+
 
     if n_batch * batch_size < n_preds:
       i = n_batch
-      mss_batch = np.zeros((n_preds - n_batch * batch_size, 802, 80))
+      mss_batch = np.zeros((n_preds - n_batch * batch_size, 802, 80), dtype=np.float32)
       for j in range(n_preds - n_batch * batch_size):
         seg = in_signal_pad[(i * batch_size + j)* hop_size_samples:((i * batch_size + j) * hop_size_samples) + win_length_samples]
         seg = librosa.util.normalize(seg)
@@ -192,7 +197,8 @@ class MusicSpeechController():
         M = mss.T
         mss_batch[j, :, :] = M
 
-      preds[i * batch_size:n_preds, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
+      #preds[i * batch_size:n_preds, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
+      preds[i * batch_size:(i + 1) * batch_size, :, :] = (self.client.predict([mss_batch])[0] >= [0.5, 0.5]).astype(float)
 
     preds_mid = np.copy(preds[1:-1, 100:702, :])
 
@@ -223,5 +229,5 @@ class MusicSpeechController():
     p_smooth = self.smooth_output(oop.T, min_speech=1.3, min_music=3.4, max_silence_speech=0.4, max_silence_music=0.6)
     p_smooth = p_smooth.T
     see = self.preds_to_se(p_smooth, audio_clip_length=input_data.size/self.params.sample_rate)    
-    
+
     return see

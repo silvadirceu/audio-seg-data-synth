@@ -1,0 +1,11 @@
+name: "music-detection"
+platform: "tensorflow_savedmodel"
+max_batch_size: 0
+
+input[
+{
+    name: "mel_input"
+    data_type: TYPE_FP32
+    dims: [-1,802,80]
+}
+]
