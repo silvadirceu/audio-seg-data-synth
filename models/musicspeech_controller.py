@@ -8,6 +8,7 @@ Original file is located at
 """
 
 import argparse
+from typing import Optional
 import numpy as np
 import librosa
 import math
@@ -217,11 +218,19 @@ class MusicSpeechController:
                 mss_batch[j, :, :] = M
 
             print(mss_batch.shape)
-            # preds[i * batch_size:(i + 1) * batch_size, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
-            prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
-            preds[i * batch_size : (i + 1) * batch_size, :, :] = (
-                prediction >= [0.5, 0.5]
-            ).astype(float)
+            if self.client:
+                threshold = [0.5, 0.5]
+                prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+            else:
+                threshold = (0.5, 0.5)
+                prediction = self.model.predict(mss_batch)
+            
+            preds[i * batch_size:(i + 1) * batch_size, :, :] = (prediction >= threshold).astype(float)
+            
+            #prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+            # preds[i * batch_size : (i + 1) * batch_size, :, :] = (
+            #     prediction >= threshold
+            # ).astype(float)
 
         if n_batch * batch_size < n_preds:
             i = n_batch
@@ -240,10 +249,14 @@ class MusicSpeechController:
                 mss_batch[j, :, :] = M
             # preds[i * batch_size:n_preds, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
 
-            prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
-            preds[i * batch_size : (i + 1) * batch_size, :, :] = (
-                prediction >= [0.5, 0.5]
-            ).astype(float)
+            if self.client:
+                threshold = [0.5, 0.5]
+                prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+            else:
+                threshold = (0.5, 0.5)
+                prediction = self.model.predict(mss_batch)
+            
+            preds[i * batch_size:(i + 1) * batch_size, :, :] = (prediction >= threshold).astype(float)
 
         preds_mid = np.copy(preds[1:-1, 100:702, :])
 
