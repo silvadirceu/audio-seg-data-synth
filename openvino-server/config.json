@@ -1,0 +1,13 @@
+{
+    "model_config_list":[
+       {
+          "config":{
+             "name":"music-detection",
+             "base_path":"/models/music-detection",
+             "batch_size": "auto",
+             "shape": "auto"
+          }
+       }       
+    ]
+ }
+ 

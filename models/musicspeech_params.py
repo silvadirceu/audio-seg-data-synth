@@ -18,4 +18,4 @@ class MusicSpeech_Params:
     # Model
     model_weights_file: str = 'model d-DS.h5'
     
-    batch_size: int = 128
+    batch_size: int = 32

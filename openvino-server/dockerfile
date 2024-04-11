@@ -1,0 +1,13 @@
+# Use the OpenVINO Model Server as base image
+FROM openvino/model_server:latest
+
+VOLUME /models
+
+COPY . .
+
+EXPOSE 8001
+
+CMD ["--config_path", "/opt/ml/config.json", "--port", "8001"]
+
+# docker build . -t ovserver
+# docker run --rm -v ${PWD}/models:/model -v ${PWD}/config.json:/opt/ml/config.json -p 8101:8001 ovserver
