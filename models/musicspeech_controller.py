@@ -14,7 +14,6 @@ import librosa
 import math
 from hermes.abstract.client import Client
 from hermes.openvino.client import OpenVinoClient
-from hermes.triton.client import TritonClient
 from musicspeech_class import MusicSpeechClass
 
 
@@ -26,10 +25,12 @@ class MusicSpeechController:
         self.params = params
         self.client = client
         self.output_name = None
-        if isinstance(self.client, TritonClient):
-            self.output_name = "time_distributed"
-        elif isinstance(self.client, OpenVinoClient):
+        if isinstance(self.client, OpenVinoClient):
             self.output_name = "Identity:0"
+        else:
+            self.output_name = "time_distributed"
+        
+        self.threshold = params.threshold
 
     def frames_to_time(self, f, sr=22050.0, hop_size=220):
         return f * hop_size / sr
@@ -218,16 +219,13 @@ class MusicSpeechController:
                 mss_batch[j, :, :] = M
 
             print(mss_batch.shape)
-            if self.client:
-                threshold = [0.5, 0.5]
-                prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
-            else:
-                threshold = (0.5, 0.5)
-                prediction = self.model.predict(mss_batch)
-            
-            preds[i * batch_size:(i + 1) * batch_size, :, :] = (prediction >= threshold).astype(float)
-            
-            #prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+
+            prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
+            preds[i * batch_size : (i + 1) * batch_size, :, :] = (
+                prediction >= self.threshold
+            ).astype(float)
+
+            # prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
             # preds[i * batch_size : (i + 1) * batch_size, :, :] = (
             #     prediction >= threshold
             # ).astype(float)
@@ -249,14 +247,10 @@ class MusicSpeechController:
                 mss_batch[j, :, :] = M
             # preds[i * batch_size:n_preds, :, :] = (self.model.predict(mss_batch) >= (0.5, 0.5)).astype(float)
 
-            if self.client:
-                threshold = [0.5, 0.5]
-                prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
-            else:
-                threshold = (0.5, 0.5)
-                prediction = self.model.predict(mss_batch)
-            
-            preds[i * batch_size:(i + 1) * batch_size, :, :] = (prediction >= threshold).astype(float)
+            prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
+            preds[i * batch_size : (i + 1) * batch_size, :, :] = (
+                prediction >= self.threshold
+            ).astype(float)
 
         preds_mid = np.copy(preds[1:-1, 100:702, :])
 

@@ -12,9 +12,10 @@ import tensorflow as tf
 import math
 from tensorflow import keras
 from tensorflow.keras import layers
+from hermes.abstract.client import Client
 
 
-class MusicSpeechClass():
+class MusicSpeechClass(Client):
   
   def __init__(self, params):
     
@@ -56,8 +57,8 @@ class MusicSpeechClass():
 
     return model
 
-  def predict(self, input_data):
+  def predict(self, *inputs, timeout=None):
 
-    oop = self.model.predict(input_data)
+    oop = self.model.predict(inputs[0])
 
-    return oop
+    return {"time_distributed": oop}
