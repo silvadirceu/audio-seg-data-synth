@@ -220,7 +220,7 @@ class MusicSpeechController:
             print(mss_batch.shape)
             if self.client:
                 threshold = [0.5, 0.5]
-                prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+                prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
             else:
                 threshold = (0.5, 0.5)
                 prediction = self.model.predict(mss_batch)
@@ -251,7 +251,7 @@ class MusicSpeechController:
 
             if self.client:
                 threshold = [0.5, 0.5]
-                prediction = self.client.predict([mss_batch], timeout=20000)[self.output_name]
+                prediction = self.client.predict(mss_batch, timeout=20000)[self.output_name]
             else:
                 threshold = (0.5, 0.5)
                 prediction = self.model.predict(mss_batch)
