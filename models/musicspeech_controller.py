@@ -14,14 +14,14 @@ import librosa
 import math
 from hermes.abstract.client import Client
 from hermes.openvino.client import OpenVinoClient
-from musicspeech_class import MusicSpeechClass
+
+# from musicspeech_class import MusicSpeechClass
 
 
 class MusicSpeechController:
 
     def __init__(self, client: Client, params):
-
-        self.model = MusicSpeechClass(params)
+        # self.model = MusicSpeechClass(params)
         self.params = params
         self.client = client
         self.output_name = None
@@ -29,7 +29,7 @@ class MusicSpeechController:
             self.output_name = "Identity:0"
         else:
             self.output_name = "time_distributed"
-        
+
         self.threshold = params.threshold
 
     def frames_to_time(self, f, sr=22050.0, hop_size=220):
