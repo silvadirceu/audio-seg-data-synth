@@ -1,0 +1,31 @@
+# - * - coding: utf - 8 -
+# from setuptools import setup, find_packages
+
+# setup(
+#     name='ciaev.metrics',
+#     version="0.0.1",
+#     description='Audio Cover Song Metrics: A library to compare '
+#                 'results of algorithms of VI',
+#     packages=['ciaev', 'ciaev.metrics', 'ciaev.metrics.util'],
+#     install_requires=["pyannote.core==4.3"],
+#     r
+#     #package_data={'': ['data/*.csv']}
+# )
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cia.ev.metrics"
+version = "2024.0.0"
+dependencies = [
+  "pyannote.core==4.3",
+  "numpy",
+]
+requires-python = ">=3.9"
+description= "Audio Cover Song Metrics: A library to compare results of algorithms of VI"
+readme = "README.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cia", "cia.ev", "cia.ev.metrics", "cia.ev.utils"]
